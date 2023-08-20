@@ -1,0 +1,28 @@
+{
+    Author: Samuele Giraudo
+    Creation: (aug. 2022), aug. 2023
+    Modifications: aug. 2023
+
+    Part of the Qlusster standard library written in Aclove.
+}
+
+let mul = !../Signals/Multiplication in
+let vert = !../Operations/Vertical in
+let timbre = !../Timbres/Membrane in
+let shape = !../Shapes/Trapezoid in
+let detune = !../Effects/Detune in
+
+let attack = '0.2 in
+let decay = '0.2 in
+let detune_mix = '0.35 in
+let detune_factor = '1.01 in
+
+'wet_wood [
+    @ %frequency %duration %loudness ->
+        let s1 = !../Timbres/Signal timbre %frequency %duration in
+        let s2 = detune detune_mix detune_factor s1 in
+        let s3 = s2 <mul> (shape attack decay %duration) in
+        let s4 = vert %loudness s3 in
+        s4
+]
+

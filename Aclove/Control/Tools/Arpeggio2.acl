@@ -1,0 +1,15 @@
+{
+    Author: Samuele Giraudo
+    Creation: aug. 2023
+    Modifications: aug. 2023
+
+    Part of the Qlusster standard library written in Aclove.
+}
+
+let conc = !../Signals/Concatenation in
+let add = !../Signals/Addition in
+
+'arpeggio2 [
+    @ %s1 %d1 %s2 -> %s1 <add> (!Silence %d1 <conc> %s2)
+]
+

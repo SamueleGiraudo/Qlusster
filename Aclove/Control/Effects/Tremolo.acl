@@ -1,0 +1,27 @@
+{
+    Author: Samuele Giraudo
+    Creation: aug. 2023
+    Modifications: aug. 2023
+
+    Part of the Qlusster standard library written in Aclove.
+}
+
+let seg = !../Signals/Segment in
+let mul = !../Signals/Multiplication in
+let conc = !../Signals/Concatenation in
+let str = !../Signals/Stretch in
+let dur = !../Signals/Duration in
+let rev = !../Operations/Reverse in
+let inv = !../Operations/Inverse in
+let sub = !../Operations/Substraction in
+let sig = !../Timbres/Signal in
+
+'tremolo [
+    @ %delay %intensity %s ->
+        let gr1 = str '0.5 (seg (sub '1 %intensity) '1) in
+        let gr2 = rev gr1 in
+        let gr = gr1 <conc> gr2 in
+        let shape = sig gr (inv %delay) (dur %s) in
+        %s <mul> shape
+]
+

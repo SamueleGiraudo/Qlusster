@@ -1,0 +1,10 @@
+{
+    Author: Samuele Giraudo
+    Creation: jul. 2023
+    Modifications: jul. 2023, aug. 2023
+
+    Part of the Qlusster standard library written in Aclove.
+}
+
+'multiplication : +!Signals ^ +!Signals ^ +!Signals
+

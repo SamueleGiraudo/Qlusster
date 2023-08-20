@@ -1,0 +1,16 @@
+{
+    Author: Samuele Giraudo
+    Creation: aug. 2023
+    Modifications: aug. 2023
+
+    Part of the Qlusster standard library written in Aclove.
+}
+
+let frequency = !../Tools/Frequency in
+let mul = !../Signals/Multiplication in
+
+'play [
+    @ %synth %basis_freq %basis_dur %basis_loud %nbo %step %dur ->
+        %synth (frequency %nbo %step %basis_freq) (mul %dur %basis_dur) %basis_loud
+]
+

@@ -1,0 +1,23 @@
+{
+    Author: Samuele Giraudo
+    Creation: jul. 2023
+    Modifications: jul. 2023, aug. 2023
+
+    Part of the Qlusster standard library written in Aclove.
+}
+
+let mul = !../Signals/Multiplication in
+let exp = !../Signals/Exponentiation in
+let inv = !../Operations/Inverse in
+
+{
+'frequency %nb_steps_octave %step %root_frequency rewrites to the scalar which is the
+frequency of the note at the step %step from the root such that there are %nb_step
+steps_octave by octave and such that the frequency of the step 0, the root, is
+%root_frequency.
+}
+'frequency [
+    @ %nb_steps_octave %step %root_frequency ->
+        %root_frequency <mul> (exp '2 (%step <mul> inv %nb_steps_octave))
+]
+

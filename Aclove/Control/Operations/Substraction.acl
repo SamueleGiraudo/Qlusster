@@ -1,0 +1,14 @@
+{
+    Author: Samuele Giraudo
+    Creation: aug. 2023
+    Modifications: aug. 2023
+
+    Part of the Qlusster standard library written in Aclove.
+}
+
+let add = !../Signals/Addition in
+
+'substraction [
+    @ %s1 %s2 -> %s1 <add> !Opposite %s2
+]
+

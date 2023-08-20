@@ -1,0 +1,36 @@
+{
+    Author: Samuele Giraudo
+    Creation: (aug. 2022), aug. 2023
+    Modifications: aug. 2023
+
+    Part of the Qlusster standard library written in Aclove.
+}
+
+let add = !../Signals/Addition in
+let mul = !../Signals/Multiplication in
+let vert = !../Operations/Vertical in
+let triangle = !../Granules/Triangle in
+let shape = !../Shapes/Trapezoid in
+let detune = !../Effects/Detune in
+
+let attack = '0.02 in
+let decay = '0.05 in
+let detune_mix_1 = '0.3 in
+let detune_factor_1 = '1.005 in
+let detune_mix_2 = '0.5 in
+let detune_factor_2 = '1.01 in
+let detune_mix_3 = '0.4 in
+let detune_factor_3 = '1.015 in
+
+'spring_bird [
+    @ %frequency %duration %loudness ->
+        let s1 = !../Timbres/Signal triangle %frequency %duration in
+        let s2_1 = detune detune_mix_1 detune_factor_1 s1 in
+        let s2_2 = detune detune_mix_2 detune_factor_2 s1 in
+        let s2_3 = detune detune_mix_3 detune_factor_3 s1 in
+        let s3 = vert '0.333 s2_1 <add> vert '0.333 s2_2 <add> vert '0.333 s2_3 in
+        let s4 = s3 <mul> (shape attack decay %duration) in
+        let s5 = vert %loudness s4 in
+        s5
+]
+

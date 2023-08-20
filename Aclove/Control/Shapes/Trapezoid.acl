@@ -1,0 +1,32 @@
+{
+    Author: Samuele Giraudo
+    Creation: jul. 2023
+    Modifications: jul. 2023, aug. 2023
+
+    Part of the Qlusster standard library written in Aclove.
+}
+
+let seg = !../Signals/Segment in
+let conc = !../Signals/Concatenation in
+let str = !../Signals/Stretch in
+let min = !../Operations/Minimum in
+let sub = !../Operations/Substraction in
+
+{
+'trapezoid %attack %decay %duration rewrites to the signal equal to a trapezoid of length
+%duration. made of a first crescent segment of length %attack, and a last decrescent segment
+of length %decay.
+}
+'trapezoid[
+    @ %attack %decay %duration ->
+        let s_attack =
+            str %attack (seg '0 '1) <conc> str (%duration <sub> %attack) (seg '1 '1)
+        in
+        let s_decay =
+            str (%duration <sub> %decay) (seg '1 '1) <conc> str %decay (seg '1 '0)
+        in
+        s_attack <min> s_decay
+]
+
+{TODO: problem when %attack or %decay is greater than %duration.}
+

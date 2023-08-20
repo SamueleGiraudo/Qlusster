@@ -1,0 +1,16 @@
+{
+    Author: Samuele Giraudo
+    Creation: aug. 2023
+    Modifications: aug. 2023
+
+    Part of the Qlusster standard library written in Aclove.
+}
+
+let add = !../Signals/Addition in
+
+'maximum [
+    @ %s1 %s2 ->
+        let s = (%s1 <add> %s2) <!Substraction> !Difference %s1 %s2 in
+        !Vertical '0.5 s
+]
+

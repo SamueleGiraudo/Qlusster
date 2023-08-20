@@ -1,0 +1,24 @@
+{
+    Author: Samuele Giraudo
+    Creation: (aug. 2022), aug. 2023
+    Modifications: aug. 2023
+
+    Part of the Qlusster standard library written in Aclove.
+}
+
+let mul = !../Signals/Multiplication in
+let vert = !../Operations/Vertical in
+let timbre = !../Timbres/MovingLava in
+let shape = !../Shapes/Trapezoid in
+
+let attack = '0.05 in
+let decay = '0.03 in
+
+'spicy_light [
+    @ %frequency %duration %loudness ->
+        let s1 = !../Timbres/Signal timbre %frequency %duration in
+        let s2 = s1 <mul> (shape attack decay %duration) in
+        let s3 = vert %loudness s2 in
+        s3
+]
+

@@ -1,0 +1,31 @@
+{
+    Author: Samuele Giraudo
+    Creation: (aug. 2022), aug. 2023
+    Modifications: aug. 2023
+
+    Part of the Qlusster standard library written in Aclove.
+}
+
+let mul = !../Signals/Multiplication in
+let vert = !../Operations/Vertical in
+let timbre = !../Timbres/CrispyWind in
+let shape = !../Shapes/Trapezoid in
+let octaver = put ../Effects/Octaver in
+
+let attack = '0.1 in
+let decay = '0.08 in
+let octaver_mix_1 = '0.6 in
+let octaver_octave_1 = '-1 in
+let octaver_mix_2 = '0.4 in
+let octaver_octave_2 = '-2 in
+
+'nice_monster [
+    @ %frequency %duration %loudness ->
+        let s1 = !../Timbres/Signal timbre %frequency %duration in
+        let s2 = octaver octaver_mix_1 octaver_octave_1 s1 in
+        let s3 = octaver octaver_mix_2 octaver_octave_2 s2 in
+        let s4 = s3 <mul> (shape attack decay %duration) in
+        let s5 = vert %loudness s4 in
+        s5
+]
+

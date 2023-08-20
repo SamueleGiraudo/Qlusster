@@ -1,0 +1,16 @@
+{
+    Author: Samuele Giraudo
+    Creation: jul. 2023
+    Modifications: jul. 2023, aug. 2023
+
+    Part of the Qlusster standard library written in Aclove.
+}
+
+let exp = !../Signals/Exponentiation in
+
+'octaver [
+    @ %mix_factor %octave %s ->
+        let octave_factor = exp '2 %octave in
+        !Detune %mix_factor octave_factor %s
+]
+

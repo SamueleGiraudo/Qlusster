@@ -1,0 +1,1 @@
+/home/samuele/Universite/Recherche/Themes/TermRewriteSystems/TermRewriteSystems/Aclove/RemoveColors.sh

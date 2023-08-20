@@ -1,0 +1,18 @@
+{
+    Author: Samuele Giraudo
+    Creation: aug. 2023
+    Modifications: aug. 2023
+
+    Part of the Qlusster standard library written in Aclove.
+}
+
+let seg = !../Signals/Segment in
+let mul = !../Signals/Multiplication in
+let exp = !../Signals/Exponentiation in
+let str = !../Signals/Stretch in
+let dur = !../Signals/Duration in
+
+'absolute_value [
+    @ %s -> (%s <mul> %s) <exp> str (dur %s) (seg '0.5 '0.5)
+]
+

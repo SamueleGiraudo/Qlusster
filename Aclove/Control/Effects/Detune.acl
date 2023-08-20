@@ -1,0 +1,21 @@
+{
+    Author: Samuele Giraudo
+    Creation: jul. 2023
+    Modifications: jul. 2023, aug. 2023
+
+    Part of the Qlusster standard library written in Aclove.
+}
+
+let add = !../Signals/Addition in
+let ver = !../Operations/Vertical in
+let opp = !../Operations/Opposite in
+let squ = !../Operations/Squeeze in
+
+'detune [
+    @ %mix_factor %freq_factor %s ->
+        let original_mix_factor = add '1 (opp %mix_factor) in
+        let s1 = ver original_mix_factor %s in
+        let s2 = ver %mix_factor (squ %freq_factor %s) in
+        s1 <add> s2
+]
+

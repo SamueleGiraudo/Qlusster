@@ -1,0 +1,296 @@
+{
+    Author: Samuele Giraudo
+    Creation: aug. 2023
+    Modifications: aug. 2023
+}
+
+{==========================================================================================}
+{Definitions of the main type and the eight constructors.}
+let signals = 'signals in
+
+let seg = 'segment : +signals ^ +signals ^ +signals in
+let add = 'addition : +signals ^ +signals ^ +signals in
+let mul = 'multiplication : +signals ^ +signals ^ +signals in
+let exp = 'exponentiation : +signals ^ +signals ^ +signals in
+let loo = 'loop : +signals ^ +signals ^ +signals in
+let str = 'stretch : +signals ^ +signals ^ +signals in
+let con = 'concatenation : +signals ^ +signals ^ +signals in
+let dur = 'duration : +signals ^ +signals in
+
+{==========================================================================================}
+{Creation of a point.}
+let p1 = '0.25 in
+{p1}
+
+{==========================================================================================}
+{Creation of a segment.}
+let s1 = seg '-1 '0.75 in
+{s1}
+
+{==========================================================================================}
+{Looping of the segment.}
+let s2 = loo '16 s1 in
+{s2}
+
+{==========================================================================================}
+{Stretching a signal.}
+let s3 = loo '220 s1 in
+let s4 = str '0.012 s3 in
+{s4}
+
+{==========================================================================================}
+{Creation of a triangular granule by concatenation.}
+let tr = seg '0 '1 <con> seg '1 '0 <con> seg '0 '-1 <con> seg '-1 '0 in
+{tr}
+
+{==========================================================================================}
+{Stretching the granule to have a length of 1 s.}
+let tr = str '0.25 tr in
+{tr}
+
+{==========================================================================================}
+{Looping and stretching the granule at some frequencies.}
+let s1 = str '0.004545 (loo '220 tr) in
+{s1}
+let s2 = str '0.003030 (loo '330 tr) in
+{s2}
+let s3 = str '0.002272 (loo '440 tr) in
+let s4 = s1 <con> s2 <con> s3 <con> s1 <con> s3 in
+{s4}
+
+{==========================================================================================}
+{Addition of two signals.}
+let s4 = s1 <add> s2 in
+{s4}
+
+{==========================================================================================}
+{Multiplication of two signals.}
+let s5 = s1 <mul> s2 in
+{s5}
+
+{==========================================================================================}
+{Exponentiation of two signals.}
+let s6 = s1 <exp> s2 in
+{s6}
+
+{==========================================================================================}
+{Vertical scaling of a signal.}
+let s7 = s1 <mul> str (dur s1) (seg '0.5 '0.5) in
+{s7}
+
+{==========================================================================================}
+{First derived operation: vertical scaling of a signal.}
+let ver =
+    'vertical [
+        @ %sc %s -> %s <mul> str (dur %s) (seg %sc %sc)
+    ]
+in
+let s8 = ver '0.75 s1 in
+{s8}
+let s9 = ver '0.5 s1 <add> ver '0.5 s2 in
+{s9}
+
+{==========================================================================================}
+{Second derived operation: inverse of a signal.}
+let inv =
+    'inverse [
+        @ %s -> %s <exp> str (dur %s) (seg '-1 '-1)
+    ]
+in
+let s10 = inv s1 in
+{s10}
+
+{==========================================================================================}
+{Third derived operation: squeeze of a signal.}
+let squ =
+    'squeeze [
+        @ %sc %s -> str (inv %sc) (loo %sc %s)
+    ]
+in
+let s11 = squ '220 tr in
+{s11}
+
+{==========================================================================================}
+{Computation of note frequencies in the 12-TET.}
+let freq =
+    'frequency [
+        @ %step ->
+            let inv_12 = inv '12 in
+            '220 <mul> (exp '2 (%step <mul> inv_12))
+    ]
+in
+
+{==========================================================================================}
+{Computation of a note from a step and a duration.}
+let note =
+    'note [
+        @ %step %duration ->
+            let f = freq %step in
+            str (inv f) (loo (%duration <mul> f) tr)
+    ]
+in
+let p =
+    note '0 '1 <con> note '2 '0.5 <con> note '3 '0.5 <con> note '5 '1
+    <con> note '7 '0.5 <con> note '8 '0.5 <con> note '10 '1 <con> note '12 '2
+in
+{p}
+
+{==========================================================================================}
+{Building a granule by additive synthesis.}
+let gr =
+    ver '0.5 (squ '1 tr)
+    <add>
+    ver '0.12 (squ '2 tr)
+    <add>
+    ver '0.28 (squ '3 tr)
+    <add>
+    ver '0.1 (squ '4 tr)
+in
+{gr}
+
+{==========================================================================================}
+{Playing this new granule.}
+let s = squ '220 gr in
+{s}
+
+{==========================================================================================}
+{Building a synthesizer.}
+let play =
+    'play [
+        @ %step %duration %loudness ->
+            let gr =
+                ver '0.5 (squ '1 tr)
+                <add>
+                ver '0.12 (squ '2 tr)
+                <add>
+                ver '0.28 (squ '3 tr)
+                <add>
+                ver '0.1 (squ '4 tr)
+            in
+            let f = freq %step in
+            let s1 = str (inv f) (loo (%duration <mul> f) gr) in
+            let s2 = ver %loudness s1 in
+            s2
+    ]
+in
+let p =
+    play '0 '1 '0.5 <con> play '3 '1 '0.25 <con> play '7 '0.5 '0.5 <con> play '8 '0.5 '0.5
+    <con>
+    (play '0 '1 '0.33 <add> play '3 '1 '0.33 <add> play '7 '1 '0.33)
+in
+{p}
+
+{==========================================================================================}
+{Creation of envelopes for sounds.}
+let opp = 'opposite [@ %s -> ver '-1 %s] in
+let sub = 'substraction [@ %s1 %s2 -> %s1 <add> opp %s2] in
+let attack = '0.11 in
+let decay = '0.06 in
+let apply_envelope =
+    'apply_envelope [
+        @ %s ->
+            let d = dur %s in
+            let s_attack = str attack (seg '0 '1) in
+            let s_decay = str decay (seg '1 '0) in
+            let s_middle = str ((d <sub> attack) <sub> decay) (seg '1 '1) in
+            let env = s_attack <con> s_middle <con> s_decay in
+            %s <mul> env
+    ]
+in
+let s = apply_envelope (play '0 '1 '1) in
+{s}
+
+{==========================================================================================}
+{Adding an envelope to the synthesizer.}
+let play2 =
+    'play2 [
+        @ %step %duration %loudness ->
+            let gr =
+                ver '0.5 (squ '1 tr)
+                <add>
+                ver '0.12 (squ '2 tr)
+                <add>
+                ver '0.28 (squ '3 tr)
+                <add>
+                ver '0.1 (squ '4 tr)
+            in
+            let f = freq %step in
+            let s1 = str (inv f) (loo (%duration <mul> f) gr) in
+            let s2 = ver %loudness s1 in
+            let s3 = apply_envelope s2 in
+            s3
+    ]
+in
+let silence = 'silence [@ %duration -> str %duration (seg '0 '0)] in
+let p1 =
+    play '0 '1 '0.5 <con> play '3 '1 '0.25 <con> play '7 '0.5 '0.5 <con> play '8 '0.5 '0.5
+    <con>
+    (play '0 '1 '0.33 <add> play '3 '1 '0.33 <add> play '7 '1 '0.33)
+in
+let p2 =
+    play2 '0 '1 '0.5 <con> play2 '3 '1 '0.25 <con> play2 '7 '0.5 '0.5
+    <con> play2 '8 '0.5 '0.5
+    <con> (play2 '0 '1 '0.33 <add> play2 '3 '1 '0.33 <add> play2 '7 '1 '0.33)
+in
+let p3 = p1 <con> silence '1 <con> p2 in
+{p3}
+
+{==========================================================================================}
+{Building a delay effect.}
+let delay =
+    'delay [
+        @ %mix_factor %delay %s ->
+            let original_mix_factor = add '1 (opp %mix_factor) in
+            let s1 = ver original_mix_factor %s in
+            let s2 = ver %mix_factor (silence %delay <con> %s) in
+            s1 <add> s2
+    ]
+in
+let p1 =
+    play2 '0 '0.5 '0.5 <con> play2 '3 '0.5 '0.5 <con> play2 '7 '0.5 '0.5
+    <con> play2 '2 '0.5 '0.5 <con> play2 '5 '0.5 '0.5 <con> play2 '8 '0.5 '0.5
+    <con> play2 '7 '1 '0.5
+in
+let p2 =
+    p1
+    <con> silence '1 <con>
+    delay '0.25 '0.1 p1
+    <con> silence '1 <con>
+    delay '0.45 '0.1 p1
+    <con> silence '1 <con>
+    delay '0.45 '0.25 p1
+    <con> silence '1 <con>
+    delay '0.35 '0.45 (delay '0.45 '0.25 p1)
+in
+{p2}
+
+{==========================================================================================}
+{Building a detuner effect.}
+let detune =
+    'detune [
+        @ %mix_factor %freq_factor %s ->
+            let original_mix_factor = add '1 (opp %mix_factor) in
+            let s1 = ver original_mix_factor %s in
+            let s2 = ver %mix_factor (squ %freq_factor %s) in
+            s1 <add> s2
+    ]
+in
+let p2 =
+    p1
+    <con> silence '1 <con>
+    detune '0.2 '1.005 p1
+    <con> silence '1 <con>
+    detune '0.2 '1.009 p1
+    <con> silence '1 <con>
+    detune '0.4 '1.009 p1
+in
+{p2}
+
+{==========================================================================================}
+{Chaining effects.}
+let chain = 'chain [@ %f %x -> %x %f] in
+let p2 =
+    p1 <chain> delay '0.45 '0.25 <chain> detune '0.2 '1.009 <chain> detune '0.1 '1.001
+in
+p2
+

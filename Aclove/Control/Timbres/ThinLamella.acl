@@ -1,0 +1,21 @@
+{
+    Author: Samuele Giraudo
+    Creation: jul. 2023
+    Modifications: jul. 2023, aug. 2023
+
+    Part of the Qlusster standard library written in Aclove.
+}
+
+let v = !../Operations/Vertical in
+let a = !../Signals/Addition in
+let sq = !../Operations/Squeeze in
+let gr = !../Granules/Triangle in
+
+v '0.274 (sq '1 gr)
+<a> v '0.262 (sq '2 gr)
+<a> v '0.219 (sq '3 gr)
+<a> v '0.082 (sq '4 gr)
+<a> v '0.027 (sq '5 gr)
+<a> v '0.082 (sq '6 gr)
+<a> v '0.054 (sq '7 gr)
+

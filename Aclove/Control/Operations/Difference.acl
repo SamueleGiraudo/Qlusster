@@ -1,0 +1,12 @@
+{
+    Author: Samuele Giraudo
+    Creation: aug. 2023
+    Modifications: aug. 2023
+
+    Part of the Qlusster standard library written in Aclove.
+}
+
+'difference [
+    @ %s1 %s2 -> !AbsoluteValue (%s1 <!Substraction> %s2)
+]
+

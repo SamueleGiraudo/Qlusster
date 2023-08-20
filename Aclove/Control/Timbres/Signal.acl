@@ -1,0 +1,18 @@
+{
+    Author: Samuele Giraudo
+    Creation: aug. 2023
+    Modifications: aug. 2023
+
+    Part of the Qlusster standard library written in Aclove.
+}
+
+let loo = !../Signals/Loop in
+let str = !../Signals/Stretch in
+let mul = !../Signals/Multiplication in
+let inv = !../Operations/Inverse in
+
+'signal [
+    @ %timbre %frequency %duration ->
+        str (inv %frequency) (loo (%duration <mul> %frequency) %timbre)
+]
+

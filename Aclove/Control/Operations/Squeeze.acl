@@ -1,0 +1,19 @@
+{
+    Author: Samuele Giraudo
+    Creation: jul. 2023
+    Modifications: jul. 2023, aug. 2023
+
+    Part of the Qlusster standard library written in Aclove.
+}
+
+let loo = !../Signals/Loop in
+let str = !../Signals/Stretch in
+
+{
+'squeeze %sc %sig rewrites to the signal obtained by looping %sc times the signal %sig and
+by preserving its length.
+}
+'squeeze [
+    @ %sc %s -> str (!Inverse %sc) (loo %sc %s)
+]
+

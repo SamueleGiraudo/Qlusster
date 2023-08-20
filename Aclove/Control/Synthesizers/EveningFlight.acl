@@ -1,0 +1,32 @@
+{
+    Author: Samuele Giraudo
+    Creation: (aug. 2022), jul. 2023
+    Modifications: jul. 2023, aug. 2023
+
+    Part of the Qlusster standard library written in Aclove.
+}
+
+let mul = !../Signals/Multiplication in
+let vert = !../Operations/Vertical in
+let timbre = !../Timbres/CrispyWind in
+let shape = !../Shapes/Trapezoid in
+let detune = !../Effects/Detune in
+let tremolo = !../Effects/Tremolo in
+
+let attack = '0.05 in
+let decay = '0.1 in
+let detune_mix = '0.35 in
+let detune_factor = '1.01 in
+let tremolo_delay = '0.16 in
+let tremolo_intensity = '0.35 in
+
+'evening_flight [
+    @ %frequency %duration %loudness ->
+        let s1 = !../Timbres/Signal timbre %frequency %duration in
+        let s2 = detune detune_mix detune_factor s1 in
+        let s3 = s2 <mul> (shape attack decay %duration) in
+        let s4 = tremolo tremolo_delay tremolo_intensity s3 in
+        let s5 = vert %loudness s4 in
+        s5
+]
+
