@@ -10,8 +10,8 @@ Copyright (C) 2022--2023 [Samuele Giraudo](https://igm.univ-mlv.fr/~giraudo/) -
 ## Quick overview
 TODO
 
-See this [introductory video](https://www.youtube.com/watch?v=Uv2OmGtPK80) (only in french
-for the time being).
+See this [introductory video](https://youtu.be/Uv2OmGtPK80) (only in french for the time
+being).
 
 This program is linked with [Aclove](https://github.com/SamueleGiraudo/Aclove), a
 programming language to pilot Qlusster and write high level musical specifications. See
