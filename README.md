@@ -3,7 +3,7 @@
 
 A programming language to build sounds by granular synthesis.
 
-Copyright (C) 2022--2023 [Samuele Giraudo](https://igm.univ-mlv.fr/~giraudo/) -
+Copyright (C) 2022--2024 [Samuele Giraudo](https://igm.univ-mlv.fr/~giraudo/) -
 `giraudo.samuele@uqam.ca` -
 
 
@@ -58,16 +58,15 @@ This [page](Help.md) contains the description of the Qlusster language.
 Qlusster program files must have `.qlu` as extension. The main command is
 
 ```
-./qlusster [--help] [--version] --file PATH [--verbose] [--bunch START LEN] [--write]
-[--draw] [--play]
+./qlusster [--help] [--version] --file PATH [--verbose LVL] [--bunch START LEN] [--write] [--draw] [--play]
 ```
 
 where
 
 + `--help` prints the short help.
 + `--version` prints the version and other information.
-+ `--file PATH` sets PATH as the path to the Qlusster program to consider.
-+ `--verbose` enables the verbose mode.
++ `--file PATH` sets `PATH` as the path to the Qlusster program to consider.
++ `--verbose LVL` enables the verbose mode at level LVL from 0 (nothing) to 2 (full). By default, the level is 1.
 + `--bunch START LEN` specifies the part of the generated signal to consider, with its
   starting time `START` and length `LEN` in seconds.
 + `--write` creates the PCM file specified by the program.

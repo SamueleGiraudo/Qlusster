@@ -1,108 +1,108 @@
 {
     Author: Samuele Giraudo
-    Creation: (dec. 2022), nov. 2022
-    Modifications: nov. 2022, dec. 2022, apr. 2023, jun. 2023, jul. 2023, aug. 2023
+    Creation: (dec. 2020), dec. 2023
+    Modifications: dec. 2023, jan. 2024
+
+    Part of the Qlusster standard library written in Aclove.
 }
 
-let a = put ../Control/Signals/Addition in
-let c = put ../Control/Signals/Concatenation in
-let h = put ../Control/Signals/Stretch in
-let loo = put ../Control/Signals/Loop in
-let v = put ../Control/Operations/Vertical in
+{Integers.}
+-7 = !../Calimba/Stdlib/Integers/Numbers/-7 .
+-6 = !../Calimba/Stdlib/Integers/Numbers/-6 .
+-5 = !../Calimba/Stdlib/Integers/Numbers/-5 .
+-4 = !../Calimba/Stdlib/Integers/Numbers/-4 .
+-3 = !../Calimba/Stdlib/Integers/Numbers/-3 .
+-2 = !../Calimba/Stdlib/Integers/Numbers/-2 .
+-1 = !../Calimba/Stdlib/Integers/Numbers/-1 .
+0 = !../Calimba/Stdlib/Integers/Numbers/0 .
+1 = !../Calimba/Stdlib/Integers/Numbers/1 .
+2 = !../Calimba/Stdlib/Integers/Numbers/2 .
+3 = !../Calimba/Stdlib/Integers/Numbers/3 .
+4 = !../Calimba/Stdlib/Integers/Numbers/4 .
+5 = !../Calimba/Stdlib/Integers/Numbers/5 .
+6 = !../Calimba/Stdlib/Integers/Numbers/6 .
+7 = !../Calimba/Stdlib/Integers/Numbers/7 .
+8 = !../Calimba/Stdlib/Integers/Numbers/8 .
+9 = !../Calimba/Stdlib/Integers/Numbers/9 .
+10 = !../Calimba/Stdlib/Integers/Numbers/10 .
 
-let play = put ../Control/Synthesizers/Play in
+{Signals.}
+loo = !../Calimba/Signals/Loop .
 
-let basis_freq = '220 in
-let nbo = '12 in
-let basis_dur = '0.25 in
-let basis_loud = '0.5 in
-let synth = put ../Control/Synthesizers/EveningFlight in
+{Sounds.}
+synth = !../Calimba/Synthesizers/WetWood .
+delay = !../Calimba/Effects/Delay .
+tremolo = !../Calimba/Effects/Tremolo .
 
-let delay = put ../Control/Effects/Delay in
-let tremolo = put ../Control/Effects/Tremolo in
+{Contexts.}
+pitches = !../Calimba/Terms/Contexts/Pitches/NaturalMinor '220 .
+durations = !../Calimba/Terms/Contexts/Durations/Geometric2 '0.25 .
+loudnesses = !../Calimba/Terms/Contexts/Loudnesses/Arithmetic25 '0.5 .
+context = !../Calimba/Terms/Contexts/Context pitches durations loudnesses .
 
-let n =
-    'n [@ %step %dur -> play synth basis_freq basis_dur basis_loud nbo %step %dur]
-in
+{Terms.}
+con = !../Calimba/Terms/Convert .
+emp = !../Calimba/Terms/Empty .
+ato = !../Calimba/Terms/Atom .
+cat = !../Calimba/Terms/CompleteAtom .
+sil = !../Calimba/Terms/Silence .
+jux = !../Calimba/Terms/Juxtaposition .
+sup = !../Calimba/Terms/Superposition .
+pit = !../Calimba/Terms/Modification !../Calimba/Terms/Dimensions/Pitch .
+dur = !../Calimba/Terms/Modification !../Calimba/Terms/Dimensions/Duration .
+lou = !../Calimba/Terms/Modification !../Calimba/Terms/Dimensions/Loudness .
+pco = !../Calimba/Terms/Compositions/PartialComposition .
+fco = !../Calimba/Terms/Compositions/FullComposition .
+rep = !../Calimba/Terms/Operations/Repeat .
 
-{
-    Correspondance between degrees and steps.
-    Natural Minor scale.
+p1 =
+    cat 1 0 0 0
+    >jux>
+    cat 1 2 0 0
+    >jux>
+    cat 1 4 0 0
+    >jux>
+    cat 1 2 0 0
+    >jux>
+    cat 1 7 0 0
+    >jux>
+    cat 1 2 0 0
+    >jux>
+    cat 1 0 0 0
+    >jux>
+    cat 1 -7 0 0
+.
 
-    -7: -12, -10, -9, -7, -5, -4, -2,  0
-    -6: -10,  -9, -7, -5, -4, -2,  0,  2
-    -5:  -9,  -7, -5, -4, -2,  0,  2,  3
-    -4:  -7,  -5, -4, -2,  0,  2,  3,  5
-    -3:  -5,  -4, -2,  0,  2,  3,  5,  7
-    -2:  -4,  -2,  0,  2,  3,  5,  7,  8
-    -1:  -2,   0,  2,  3,  5,  7,  8, 10
-    +0:   0,   2,  3,  5,  7,  8, 10, 12
-    +1:   2,   3,  5,  7,  8, 10, 12, 14
-    +2:   3,   5,  7,  8, 10, 12, 14, 15
-    +3:   5,   7,  8, 10, 12, 14, 15, 17
-    +4:   7,   8, 10, 12, 14, 15, 17, 19
-    +5:   8,  10, 12, 14, 15, 17, 19, 20
-    +6:  10,  12, 14, 15, 17, 19, 20, 22
-    +7:  12,  14, 15, 17, 19, 20, 22, 24
-}
+p2 =
+    cat 1 0 3 0
+    >sup>
+    cat 1 4 3 0
+.
 
-let p =
-    let line_1 =
-        n '0 '1 <c> n '3 '1 <c> n '7 '1 <c> n '3 '1 <c> n '12 '1 <c> n '3 '1 <c> n '0 '1
-        <c> n '-12 '1
-    in
-    let line_2 =
-        n '-12 '8 <a> n '-5 '8
-    in
-    line_1 <a> line_2
-in
+p3 =
+    p1
+    >sup>
+    lou -1 p2 .
 
-let p_1 =
-    let line_1 =
-        n '2 '1 <c> n '5 '1 <c> n '8 '1 <c> n '5 '1 <c> n '14 '1 <c> n '5 '1 <c> n '2 '1
-        <c> n '-10 '1
-    in
-    let line_2 =
-        n '-10 '8 <a> n '-4 '8
-    in
-    line_1 <a> line_2
-in
+p4 =
+    p3
+    >jux>
+    pit 1 p3
+    >jux>
+    pit -1 p3
+    >jux>
+    pit 2 p3
+    >jux>
+    pit -2 p3
+    >jux>
+    pit -1 p3
+    >jux>
+    p2
+.
 
-let p_m1 =
-    let line_1 =
-        n '-2 '1 <c> n '2 '1 <c> n '5 '1 <c> n '2 '1 <c> n '10 '1 <c> n '2 '1 <c> n '-2 '1
-        <c> n '-14 '1
-    in
-    let line_2 =
-        n '-14 '8 <a> n '-7 '8
-    in
-    line_1 <a> line_2
-in
+p = rep 2 p4 .
 
-let p_2 =
-    let line_1 =
-        n '3 '1 <c> n '7 '1 <c> n '10 '1 <c> n '7 '1 <c> n '15 '1 <c> n '7 '1 <c> n '3 '1
-        <c> n '-9 '1
-    in
-    let line_2 =
-        n '-9 '8 <a> n '-2 '8
-    in
-    line_1 <a> line_2
-in
-
-let p_m2 =
-    let line_1 =
-        n '-4 '1 <c> n '0 '1 <c> n '3 '1 <c> n '0 '1 <c> n '8 '1 <c> n '0 '1 <c> n '-4 '1
-        <c> n '-16 '1
-    in
-    let line_2 =
-        n '-16 '8 <a> n '-12 '8
-    in
-    line_1 <a> line_2
-in
-
-let p_end = n '-12 '8 <a> n '-5 '8 in
-
-(delay '0.2 '0.75
-    (loo '2 (p <c> p_1 <c> p_m1 <c> p_2 <c> p_m2 <c> p_m1 <c> p_end)))
+s = con synth context p .
+s = delay '0.2 '0.25 s .
+s
 

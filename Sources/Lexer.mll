@@ -1,7 +1,8 @@
 (* Author: Samuele Giraudo
  * Creation: may 2021
  * Modifications: may 2021, jun. 2021, aug. 2021, nov. 2021, dec. 2021, jan. 2022,
- * mar. 2022, may 2022, aug. 2022, nov. 2022, apr. 2023, jul. 2023, aug. 2023
+ * mar. 2022, may 2022, aug. 2022, nov. 2022, apr. 2023, jul. 2023, aug. 2023, dec. 2023,
+ * jan. 2024
  *)
 
 {
@@ -95,14 +96,27 @@ rule read = parse
     |"\n" {next_line lexbuf; read lexbuf}
     |"(" {Parser.L_PAR}
     |")" {Parser.R_PAR}
-    |"'segment" {Parser.SEGMENT}
-    |"'addition" {Parser.ADDITION}
-    |"'multiplication" {Parser.MULTIPLICATION}
-    |"'exponentiation" {Parser.EXPONENTIATION}
-    |"'loop" {Parser.LOOP}
-    |"'stretch" {Parser.STRETCH}
-    |"'concatenation" {Parser.CONCATENATION}
-    |"'duration" {Parser.DURATION}
+    |"'segment"        |"'seg" {Parser.SEGMENT}
+    |"'addition"       |"'add" {Parser.ADDITION}
+    |"'multiplication" |"'mul" {Parser.MULTIPLICATION}
+    |"'exponentiation" |"'exp" {Parser.EXPONENTIATION}
+    |"'loop"           |"'loo" {Parser.LOOP}
+    |"'stretch"        |"'str" {Parser.STRETCH}
+    |"'concatenation"  |"'con" {Parser.CONCATENATION}
+    |"'duration"       |"'dur" {Parser.DURATION}
+    |"'fence-3"        |"'fe3" {Parser.FENCE_3}
+    |"'fence-4"        |"'fe4" {Parser.FENCE_4}
+    |"'absolute-value" |"'abs" {Parser.ABSOLUTE_VALUE}
+    |"'opposite"       |"'opp" {Parser.OPPOSITE}
+    |"'subtraction"    |"'sub" {Parser.SUBTRACTION}
+    |"'difference"     |"'dif" {Parser.DIFFERENCE}
+    |"'vertical"       |"'ver" {Parser.VERTICAL}
+    |"'inverse"        |"'inv" {Parser.INVERSE}
+    |"'maximum"        |"'max" {Parser.MAXIMUM}
+    |"'minimum"        |"'min" {Parser.MINIMUM}
+    |"'squeeze"        |"'squ" {Parser.SQUEEZE}
+    |"'reverse"        |"'rev" {Parser.REVERSE}
+    |"'complementary"  |"'com" {Parser.COMPLEMENTARY}
     |number_string {Parser.SCALAR (Scalars.from_string (Lexing.lexeme lexbuf))}
     |"{" {comment 0 lexbuf}
     |eof {Parser.EOF}

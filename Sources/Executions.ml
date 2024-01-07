@@ -1,7 +1,7 @@
 (* Author: Samuele Giraudo
  * Creation: aug. 2021
  * Modifications: aug. 2021, nov. 2021, dec. 2021, jan. 2022, feb. 2022, mar. 2022,
- * may 2022, aug. 2022, jul. 2023, aug. 2023
+ * may 2022, aug. 2022, jul. 2023, aug. 2023, jan. 2024
  *)
 
 (* The delay between printing information. *)
@@ -11,9 +11,9 @@ let information_print_delay =
 (* A mutex to be sure that printings are not mixed by other threads. *)
 let print_mutex = Mutex.create ()
 
-(* Returns a thread generating the buffer from the sound s and printing information. If the
- * parameter verbose is true, some information is printed. *)
-let generate_buffer verbose s =
+(* Returns a thread generating the buffer from the sound s and printing information. The
+ * parameter verbosity specifies the level of verbosity. *)
+let generate_buffer verbosity s =
     let generation_complete = ref false in
 
     Thread.create
@@ -25,9 +25,9 @@ let generate_buffer verbose s =
             let thread_generation = Thread.create
                 (fun _ ->
                     Buffers.delete ();
-                    if verbose then begin
+                    if verbosity >= 1 then begin
                         Mutex.lock print_mutex;
-                        "# Buffer generation...\n" |> Outputs.print_information_1;
+                        "Buffer generation...\n" |> Outputs.print_information_1;
                         Mutex.unlock print_mutex
                     end;
                     let clock_start = Unix.gettimeofday () in
@@ -35,19 +35,20 @@ let generate_buffer verbose s =
                     let clock_end = Unix.gettimeofday () in
                     let time = clock_end -. clock_start in
                     generation_complete := true;
-                    if verbose then begin
+                    if verbosity >= 1 then begin
                         Mutex.lock print_mutex;
-                        "End buffer generation "
-                        |> Strings.indent 4
-                        |> Outputs.print_success;
-                        Printf.sprintf "[duration: %.2f s].\n" time
+                        "End buffer generation.\n" |> Outputs.print_success;
+                        Printf.sprintf "Duration: %.2f s.\n" time
                         |> Outputs.print_information_3;
-                        "## Buffer characteristics:\n"
-                        |> Strings.indent 4
-                        |> Outputs.print_information_2;
+                        Mutex.unlock print_mutex;
+                    end;
+                    if verbosity >= 2 then begin
+                        Mutex.lock print_mutex;
+                        "Buffer characteristics:\n" |> Outputs.print_information_2;
                         Buffers.to_information_string ()
-                        |> Strings.indent 8
-                        |> Outputs.print_information_3;
+                        |> Strings.indent 4
+                        |> print_string;
+                        flush stdout;
                         Mutex.unlock print_mutex;
                     end)
                 ()
@@ -60,17 +61,15 @@ let generate_buffer verbose s =
                         Thread.delay information_print_delay;
                         if not !generation_complete then begin
                             let time = Unix.gettimeofday () in
-                            if verbose then begin
+                            if verbosity >= 2 then begin
                                 Mutex.lock print_mutex;
-                                "Generating: "
-                                |> Strings.indent 4 |> Outputs.print_information_2;
-                                Printf.sprintf "%.1f%% \
-                                    [Time: %.2f s / %.2f s] [Speed: %.2f s / s]\n"
+                                Printf.sprintf "Generated proportion %.1f%%; \
+                                    Time: %.2f s / %.2f s; Speed: %.2f s / s\n"
                                     (100.0 *. Buffers.duration () /. total_duration)
                                     (Buffers.duration ())
                                     total_duration
                                     (Buffers.duration () /. (time -. start_generation))
-                                |> Outputs.print_information_3;
+                                |> Outputs.print_information_2;
                                 Mutex.unlock print_mutex
                             end
                         end;
@@ -83,9 +82,9 @@ let generate_buffer verbose s =
             Thread.join thread_generation)
         ()
 
-(* Returns a thread playing the sound in the buffer and printing information. If the
- * parameter verbose is true, some information is printed.*)
-let play_buffer verbose =
+(* Returns a thread playing the sound in the buffer and printing information. The
+ * parameter verbosity specifies the level of verbosity. *)
+let play_buffer verbosity =
     Thread.create
         (fun _ ->
             let start_play_time = ref 0.0 in
@@ -95,19 +94,17 @@ let play_buffer verbose =
             let thread_player = Thread.create
                 (fun _ ->
                     Sys.command "killall aplay &> /dev/null" |> ignore;
-                    if verbose then begin
+                    if verbosity >= 1 then begin
                         Mutex.lock print_mutex;
-                        "# Playing...\n" |> Outputs.print_information_1;
+                        "Playing...\n" |> Outputs.print_information_1;
                         Mutex.unlock print_mutex
                     end;
                     start_play_time := Unix.gettimeofday ();
                     playing := true;
                     Buffers.play ();
-                    if verbose then begin
+                    if verbosity >= 1 then begin
                         Mutex.lock print_mutex;
-                        "End buffer playing.\n"
-                        |> Strings.indent 4
-                        |> Outputs.print_success;
+                        "End buffer playing.\n" |> Outputs.print_success;
                         Mutex.unlock print_mutex
                     end;
                     playing := false)
@@ -122,16 +119,14 @@ let play_buffer verbose =
                         if !playing then begin
                             let time = Unix.gettimeofday () in
                             let play_duration = time -. !start_play_time in
-                            if verbose then begin
+                            if verbosity >= 2 then begin
                                 Mutex.lock print_mutex;
-                                "Playing: "
-                                |> Strings.indent 4
-                                |> Outputs.print_information_2;
-                                Printf.sprintf "%.1f%% [Time: %.2f s / %.2f s]\n"
+                                Printf.sprintf "Played proportion: %.1f%%; \
+                                    Time: %.2f s / %.2f s\n"
                                     (100.0 *. play_duration /. Buffers.duration ())
                                     play_duration
                                     (Buffers.duration ())
-                                |> Outputs.print_information_3;
+                                |> Outputs.print_information_2;
                                 Mutex.unlock print_mutex
                             end
                         end;
@@ -146,12 +141,12 @@ let play_buffer verbose =
 
 (* Returns an option on a pair consisting in the processed expression of the expression
  * contained in the file at path path and in its sound, cut following the bunch b. If the
- * input expression contains errors, None is returned. If the parameter verbose is true,
- * some information is printed. *)
-let interpret_path verbose path b =
-    if verbose then begin
+ * input expression contains errors, None is returned. The parameter verbosity specifies
+ * the level of verbosity. *)
+let interpret_path verbosity path b =
+    if verbosity >= 1 then begin
         Mutex.lock print_mutex;
-        "# Processing the program...\n" |> Outputs.print_information_1;
+        "Processing the program.\n" |> Outputs.print_information_1;
         Mutex.unlock print_mutex
     end;
     let clock_start = Unix.gettimeofday () in
@@ -159,60 +154,53 @@ let interpret_path verbose path b =
     let clock_end = Unix.gettimeofday () in
     let time = clock_end -. clock_start in
     if not (Processings.has_errors pr) then begin
-        if verbose then begin
+        if verbosity >= 1 then begin
             Mutex.lock print_mutex;
-            "End program processing " |> Strings.indent 4 |> Outputs.print_success;
+            "End program processing.\n" |> Outputs.print_success;
             Mutex.unlock print_mutex
         end;
         let e = Processings.expression pr in
         let s = Bunches.cut_sound (Evaluations.compute e) b in
-        if verbose then begin
+        if verbosity >= 2 then begin
             Mutex.lock print_mutex;
-            Printf.sprintf "[duration: %.2f s].\n" time |> Outputs.print_information_3;
-            "## Expression characteristics:\n"
-            |> Strings.indent 4
-            |> Outputs.print_information_2;
+            Printf.sprintf "Duration: %.2f s.\n" time |> Outputs.print_information_3;
+            "Expression characteristics:\n" |> Outputs.print_information_2;
             let st = Statistics.compute e in
-            Statistics.to_string st |> Strings.indent 8 |> print_string;
+            Statistics.to_string st |> Strings.indent 4 |> print_string;
             Mutex.unlock print_mutex
         end;
         Some (e, s)
     end
     else begin
-        Printf.sprintf "\nThere are errors in the program:\n%s"
-            (Processings.errors pr
-            |> List.map Errors.to_string
-            |> String.concat "\n"
-            |> Strings.indent 4)
-        |> Strings.indent 4
+        Printf.sprintf "There are errors in the program:\n%s"
+            (Processings.errors pr |> List.map Errors.to_string |> String.concat "\n"
+        |> Strings.indent 4)
         |> Outputs.print_error;
         print_newline ();
         None
     end
 
 (* Interprets the file at path path and, if it has no errors, plays the portion of signal of
- * the buffer specified by the bunch b each time ENTER is pressed. If the parameter verbose
- * is true, some information is printed. *)
-let interpret_path_and_play verbose path b =
-    let es = interpret_path verbose path b in
+ * the buffer specified by the bunch b each time ENTER is pressed. The parameter verbosity
+ * specifies the level of verbosity. *)
+let interpret_path_and_play verbosity path b =
+    let es = interpret_path verbosity path b in
     if Option.is_some es then begin
         let (_, s) = Option.get es in
         Buffers.delete ();
-        generate_buffer verbose s |> ignore;
+        generate_buffer verbosity s |> ignore;
 
         (* A thread to listen if the user press the Enter key in order to start playing. *)
         let thread_play_control = Thread.create
             (fun _ ->
                 let rec loop () =
                     read_line () |> ignore;
-                    play_buffer verbose |> ignore;
+                    play_buffer verbosity |> ignore;
                     loop ()
                 in
-                if verbose then begin
+                if verbosity >= 2 then begin
                     Mutex.lock print_mutex;
-                    "Press ENTER to play.\n"
-                    |> Strings.indent 4
-                    |> Outputs.print_information_2;
+                    "Press ENTER to play.\n" |> Outputs.print_information_2;
                     Mutex.unlock print_mutex
                 end;
                 loop ())
@@ -222,29 +210,34 @@ let interpret_path_and_play verbose path b =
         Thread.join thread_play_control
     end
 
+
 (* Interprets the file at path path and, if it has no errors, draws the portion of signal of
- * the buffer specified by the bunch b into a PCM file having as path a new one. If the
- * parameter verbose is true, some information is printed. *)
-let interpret_path_and_write_sound verbose path b =
-    let es = interpret_path verbose path b in
+ * the buffer specified by the bunch b into a PCM file having as path a new one. The
+ * parameter verbosity specifies the level of verbosity. *)
+let interpret_path_and_write_sound verbosity path b =
+    let es = interpret_path verbosity path b in
     if Option.is_some es then begin
         let (_, s) = Option.get es in
         let path' = (Paths.remove_extension path) ^ ".pcm" |> Paths.new_distinct in
-        if verbose then begin
+        if verbosity >= 1 then begin
             Mutex.lock print_mutex;
-            Printf.sprintf "# Writing sound in file %s...\n" path'
+            Printf.sprintf "Writing sound in file %s...\n" path'
             |> Outputs.print_information_1;
             Mutex.unlock print_mutex
         end;
         let clock_start = Unix.gettimeofday () in
-        let thread = generate_buffer verbose s in
+        let thread = generate_buffer verbosity s in
         Thread.join thread;
         Buffers.write_pcm_file path';
         let clock_end = Unix.gettimeofday () in
         let time = clock_end -. clock_start in
-        if verbose then begin
+        if verbosity >= 1 then begin
             Mutex.lock print_mutex;
-            "End writing sound in file " |> Strings.indent 4 |> Outputs.print_success;
+            "End writing sound in file " |> Outputs.print_success;
+            Mutex.unlock print_mutex
+        end;
+        if verbosity >= 2 then begin
+            Mutex.lock print_mutex;
             Printf.sprintf "[duration: %.2f s].\n" time |> Outputs.print_information_3;
             Mutex.unlock print_mutex
         end
@@ -252,36 +245,40 @@ let interpret_path_and_write_sound verbose path b =
 
 (* Interprets the file at path path and, if it has no errors, draws the portion of signal of
  * the buffer specified by the bunch b into an SVG file and a PNG file having as paths new
- * ones. If the parameter verbose is true, some information is printed. *)
-let interpret_path_and_draw_sound verbose path b =
-    let es = interpret_path verbose path b in
+ * ones. The parameter verbosity specifies the level of verbosity. *)
+let interpret_path_and_draw_sound verbosity path b =
+    let es = interpret_path verbosity path b in
     if Option.is_some es then begin
         let (_, s) = Option.get es in
         let path' = (Paths.remove_extension path) ^ ".svg" |> Paths.new_distinct in
-        if verbose then begin
+        if verbosity >= 1 then begin
             Mutex.lock print_mutex;
-            Printf.sprintf "# Drawing sound in file %s...\n" path'
+            Printf.sprintf "Drawing sound in file %s...\n" path'
             |> Outputs.print_information_1;
             Mutex.unlock print_mutex
         end;
         let clock_start = Unix.gettimeofday () in
-        let thread = generate_buffer verbose s in
+        let thread = generate_buffer verbosity s in
         Thread.join thread;
         Buffers.write_svg_file path';
         let path'' = (Paths.remove_extension path) ^ ".png" |> Paths.new_distinct in
-        if verbose then begin
+        if verbosity >= 1 then begin
             Mutex.lock print_mutex;
             Printf.sprintf "Drawing sound in file %s...\n" path''
-                |> Strings.indent 4 |> Outputs.print_information_2;
+            |> Outputs.print_information_2;
             Mutex.unlock print_mutex
         end;
         let cmd = Printf.sprintf "convert -density 144 %s %s" path' path'' in
         Sys.command cmd |> ignore;
         let clock_end = Unix.gettimeofday () in
         let time = clock_end -. clock_start in
-        if verbose then begin
+        if verbosity >= 1 then begin
             Mutex.lock print_mutex;
-            "End drawing sound in files " |> Strings.indent 4 |> Outputs.print_success;
+            "End drawing sound in files " |> Outputs.print_success;
+            Mutex.unlock print_mutex
+        end;
+        if verbosity >= 2 then begin
+            Mutex.lock print_mutex;
             Printf.sprintf "[duration: %.2f s].\n" time |> Outputs.print_information_3;
             Mutex.unlock print_mutex
         end

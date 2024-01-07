@@ -4,103 +4,103 @@
     Modifications: aug. 2023
 }
 
-let s = put ../Control/Signals/Segment in
-let a = put ../Control/Signals/Addition in
-let c = put ../Control/Signals/Concatenation in
-let h = put ../Control/Signals/Stretch in
-let l = put ../Control/Signals/Loop in
-let v = put ../Control/Operations/Vertical in
+s = put ../Control/Signals/Segment .
+a = put ../Control/Signals/Addition .
+c = put ../Control/Signals/Concatenation .
+h = put ../Control/Signals/Stretch .
+l = put ../Control/Signals/Loop .
+v = put ../Control/Operations/Vertical .
 
-let arp2 = put ../Control/Tools/Arpeggio2 in
-let arp3 = put ../Control/Tools/Arpeggio3 in
-let arp4 = put ../Control/Tools/Arpeggio4 in
+arp2 = put ../Control/Tools/Arpeggio2 .
+arp3 = put ../Control/Tools/Arpeggio3 .
+arp4 = put ../Control/Tools/Arpeggio4 .
 
-let play = put ../Control/Synthesizers/Play in
+play = put ../Control/Synthesizers/Play .
 
-let basis_freq = '220 in
-let nbo = '12 in
-let basis_dur = '0.5 in
-let basis_loud = '0.25 in
+basis_freq = '220 .
+nbo = '12 .
+basis_dur = '0.5 .
+basis_loud = '0.25 .
 
-let delay = put ../Control/Effects/Delay in
-let tremolo = put ../Control/Effects/Tremolo in
+delay = put ../Control/Effects/Delay .
+tremolo = put ../Control/Effects/Tremolo .
 
-let n =
-    'n [@ %synth %step %dur -> play %synth basis_freq basis_dur basis_loud nbo %step %dur]
-in
+n =
+    'n [| %synth %step %dur # play %synth basis_freq basis_dur basis_loud nbo %step %dur]
+.
 
-let p =
+p =
     'p [
-        @ %s ->
-            let n = n %s in
-            n '0 '1 <c> n '3 '1 <c> n '7 '1 <c> n '11 '1
-            <c>
-            (n '0 '4 <a>
+        | %s #
+            n = n %s .
+            n '0 '1 >c> n '3 '1 >c> n '7 '1 >c> n '11 '1
+            >c>
+            (n '0 '4 >a>
             arp4 (n '0 '4) basis_dur (n '3 '3) basis_dur (n '7 '2) basis_dur (n '11 '1))
     ]
-in
+.
 
 
 p !../Control/Synthesizers/BrownToad
-<c> !../Control/Tools/Silence basis_dur <c>
+>c> !../Control/Tools/Silence basis_dur >c>
 p !../Control/Synthesizers/DarkGlass
-<c> !../Control/Tools/Silence basis_dur <c>
-p !../Control/Synthesizers/EveningFlight
-<c> !../Control/Tools/Silence basis_dur <c>
-p !../Control/Synthesizers/FreshMorning
-<c> !../Control/Tools/Silence basis_dur <c>
+>c> !../Control/Tools/Silence basis_dur >c>
+p !../Control/Synthesizers/Even.gFlight
+>c> !../Control/Tools/Silence basis_dur >c>
+p !../Control/Synthesizers/FreshMorn.g
+>c> !../Control/Tools/Silence basis_dur >c>
 p !../Control/Synthesizers/GreySmoke
-<c> !../Control/Tools/Silence basis_dur <c>
+>c> !../Control/Tools/Silence basis_dur >c>
 p !../Control/Synthesizers/NiceMonster
-<c> !../Control/Tools/Silence basis_dur <c>
+>c> !../Control/Tools/Silence basis_dur >c>
 p !../Control/Synthesizers/NightStation
-<c> !../Control/Tools/Silence basis_dur <c>
+>c> !../Control/Tools/Silence basis_dur >c>
 p !../Control/Synthesizers/SpicyLight
-<c> !../Control/Tools/Silence basis_dur <c>
-p !../Control/Synthesizers/SpringBird
-<c> !../Control/Tools/Silence basis_dur <c>
+>c> !../Control/Tools/Silence basis_dur >c>
+p !../Control/Synthesizers/Spr.gBird
+>c> !../Control/Tools/Silence basis_dur >c>
 p !../Control/Synthesizers/SteamPlant
-<c> !../Control/Tools/Silence basis_dur <c>
+>c> !../Control/Tools/Silence basis_dur >c>
 p !../Control/Synthesizers/WetWood
-<c> !../Control/Tools/Silence basis_dur <c>
-p !../Control/Synthesizers/WindyAfternoon
+>c> !../Control/Tools/Silence basis_dur >c>
+p !../Control/Synthesizers/W.dyAfternoon
 
 {
-let s =
-n '0 '1 <c>
-n '2 '1 <c>
-n '3 '1 <c>
-n '5 '1 <c>
-n '7 '1 <c>
-n '8 '1 <c>
-n '11 '1 <c>
-n '12 '1 <c>
-n '12 '1 <c>
-n '11 '1 <c>
-n '8 '1 <c>
-n '7 '1 <c>
-n '5 '1 <c>
-n '3 '1 <c>
-n '2 '1 <c>
-n '0 '1 <c>
-(n '0 '4 <a> n '3 '4 <a> n '7 '4)
-<c>
-(n '2 '4 <a> n '5 '4 <a> n '8 '4)
-<c>
-(n '3 '4 <a> n '7 '4 <a> n '11 '4)
-<c>
-n '0 '0.5 <c> n '5 '0.5 <c> n '2 '0.5 <c> n '3 '0.5
-<c>
-n '2 '0.5 <c> n '7 '0.5 <c> n '3 '0.5 <c> n '5 '0.5
-<c>
-n '3 '0.5 <c> n '8 '0.5 <c> n '5 '0.5 <c> n '7 '0.5
-<c>
+s =
+n '0 '1 >c>
+n '2 '1 >c>
+n '3 '1 >c>
+n '5 '1 >c>
+n '7 '1 >c>
+n '8 '1 >c>
+n '11 '1 >c>
+n '12 '1 >c>
+n '12 '1 >c>
+n '11 '1 >c>
+n '8 '1 >c>
+n '7 '1 >c>
+n '5 '1 >c>
+n '3 '1 >c>
+n '2 '1 >c>
+n '0 '1 >c>
+(n '0 '4 >a> n '3 '4 >a> n '7 '4)
+>c>
+(n '2 '4 >a> n '5 '4 >a> n '8 '4)
+>c>
+(n '3 '4 >a> n '7 '4 >a> n '11 '4)
+>c>
+n '0 '0.5 >c> n '5 '0.5 >c> n '2 '0.5 >c> n '3 '0.5
+>c>
+n '2 '0.5 >c> n '7 '0.5 >c> n '3 '0.5 >c> n '5 '0.5
+>c>
+n '3 '0.5 >c> n '8 '0.5 >c> n '5 '0.5 >c> n '7 '0.5
+>c>
 arp2 (n '0 '8) '1 (n '7 '8)
-<c>
+>c>
 arp3 (n '0 '12) '1 (n '3 '12) '1 (n '7 '12)
-<c>
+>c>
 arp4 (n '0 '12) '1 (n '3 '12) '1 (n '7 '12) '0.5 (n '11 '12)
-in
+.
 
 delay '0.1 '0.6 (delay '0.2 '0.5 s)
 }

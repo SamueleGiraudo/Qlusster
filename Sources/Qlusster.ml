@@ -2,18 +2,10 @@
  * Creation: (aug. 2016), apr. 2020
  * Modifications: apr. 2020, may 2020, jul. 2020, aug. 2020, dec. 2020, jan. 2021, may 2021,
  * aug. 2021, nov. 2021, dec. 2021, jan. 2022, may 2022, aug. 2022, nov. 2022, dec. 2022,
- * jan. 2023, jul. 2023, aug. 2023
+ * jan. 2023, jul. 2023, aug. 2023, dec. 2023, jan. 2024
  *)
 
 (* Qlusster - A program to program music mixing additive and granular synthesis. *)
-
-(* TODO
- *
- * - Improve the parser to accept expressions with less parentheses.
- *
- * - Add some syntactic sugar.
- *
- *)
 
 let name = "Qlusster"
 
@@ -37,7 +29,8 @@ let description = "A minimalist granular synthesizer machine."
 (*let version = "0.1110" and version_date = "2023-07-17"*)
 (*let version = "0.1111" and version_date = "2023-07-31"*)
 (*let version = "1.0000" and version_date = "2023-08-07"*)
-let version = "1.0001" and version_date = "2023-08-20"
+(*let version = "1.0001" and version_date = "2023-08-20"*)
+let version = "1.0010" and version_date = "2024-01-07"
 
 let author = "Samuele Giraudo"
 
@@ -46,24 +39,30 @@ let email = "giraudo.samuele@uqam.ca"
 
 (* Returns a string of information about the Aclove program. *)
 let information =
-    Printf.sprintf "%s\n%s\n%s\nCopyright (C) 2022--2023 %s\nWritten by %s [%s]\n\
+    Printf.sprintf "%s\n%s\n%s\nCopyright (C) 2022--2024 %s\nWritten by %s [%s]\n\
         Version: %s (%s)\n"
         logo name description author author email version version_date
 
 (* Returns the help string about the arguments of the program. *)
 let help_string =
-      "Usage:\n    ./qlusster [--help] [--version] --file PATH [--verbose] \
+      "Usage:\n    ./qlusster [--help] [--version] --file PATH [--verbose LVL] \
       [--bunch START LEN] [--write] [--draw] [--play] \nwhere:\n"
     ^ "    + `--help` prints the short help (the present text).\n"
     ^ "    + `--version` prints the version and other information.\n"
     ^ "    + `--file PATH` sets PATH as the path to the Qlusster program to consider, \
              contained in a " ^ Files.extension ^ " file.\n"
-    ^ "    + `--verbose` enables the verbose mode.\n"
+    ^ "    + `--verbose LVL` enables the verbose mode at level `LVL`, from 0 (nothing) to \
+             2 (full). By default, the level is 1.\n"
     ^ "    + `--bunch START LEN` specifies the part of the generated signal to consider, \
              with its starting time START and length LEN in seconds.\n"
     ^ "    + `--write` creates the PCM file specified by the program.\n"
     ^ "    + `--draw` creates the SVG and PNG files specified by the program.\n"
     ^ "    + `--play` plays the signal specified by the program.\n"
+
+(* Prints the error message msg followed by a line break, and halts the execution. *)
+let error msg =
+    "Error: " ^ msg ^ "\n" |> Outputs.print_error;
+    exit 1
 
 (* Returns the bunch specified by the standard input. *)
 let read_bunch () =
@@ -74,12 +73,7 @@ let read_bunch () =
             |x1 :: x2 :: _ ->
                 Bunches.construct (Some (float_of_string x1)) (Some (float_of_string x2))
     with
-        |Failure _ -> begin
-            "Error: after -b, there must be 0, 1, or 2 float arguments.\n"
-            |> Outputs.print_error;
-            "Default bunch has be assigned.\n" |> Outputs.print_information_1;
-            exit 0
-        end
+        |Failure _ -> error "after --bunch, there must be 0, 1, or 2 float arguments."
 
 ;;
 
@@ -101,46 +95,45 @@ if Arguments.exists "--help" then begin
     exit 0
 end;
 
-(* Test if there is a single file path. *)
-let arg_lst = Arguments.option_values "--file" in
-if List.length arg_lst <> 1 then begin
-    "Error: one path must follow the --file argument.\n" |> Outputs.print_error;
-    exit 1
-end;
-
-(* The path of the file containing the program. *)
-let path = List.hd arg_lst in
+(* Reads the Qlusster program file path. *)
+let path =
+    match Arguments.option_value "--file" with
+        |None -> error "the option --file must be given and followed by one path."
+        |Some path -> path
+in
 
 (* Checks the existence of the file at path path. *)
-if Sys.file_exists path |> not then begin
-    Printf.sprintf "Error: there is no file %s.\n" path |> Outputs.print_error;
-    exit 1
-end;
+if Sys.file_exists path |> not then
+    error "there is no file %s.";
 
 (* Checks if the file has the right extension. *)
-if not (Paths.has_extension Files.extension path) then begin
-    Printf.sprintf "Error: the file %s has not %s as extension.\n" path Files.extension
-    |> Outputs.print_error;
-    exit 1
-end;
+if not (Paths.has_extension Files.extension path) then
+    error (Printf.sprintf "the file %s has not %s as extension." path Files.extension);
 
-(* Detection of the verbose mode. *)
-let verbose = Arguments.exists "--verbose" in
+(* Reads the verbosity level. *)
+let verbosity =
+    if Arguments.exists "--verbose" |> not then
+        1
+    else
+        match Arguments.bounded_integer_option_value 0 2 "--verbose" with
+            |None -> error "one integer between 0 and 2 must follow the --verbose argument."
+            |Some lvl -> lvl
+in
 
 (* Detecting a bunch specification. *)
 let bunch = read_bunch () in
 
 (* Writing a PCM file. *)
 if Arguments.exists "--write" then
-    Executions.interpret_path_and_write_sound verbose path bunch;
+    Executions.interpret_path_and_write_sound verbosity path bunch;
 
 (* Writing an SVG and PNG file. *)
 if Arguments.exists "--draw" then
-    Executions.interpret_path_and_draw_sound verbose path bunch;
+    Executions.interpret_path_and_draw_sound verbosity path bunch;
 
 (* Playing. *)
 if Arguments.exists "--play" then
-    Executions.interpret_path_and_play verbose path bunch;
+    Executions.interpret_path_and_play verbosity path bunch;
 
 exit 0
 
